@@ -17,16 +17,16 @@ def get_test_dl(test_data_folder, test_batch_size, scaler, building_value, unsam
   test_dl = torch.utils.data.DataLoader(test_ds, batch_size=test_batch_size, shuffle=False, num_workers=1)
   return test_dl
 
-def get_model_error(test_data_folder, model_path, scaler_path, building_value=None, unsampled_value=None, sampled_value=None):
+def get_model_error(test_data_folder, test_batch_size, model_path, scaler_path, building_value=None, unsampled_value=None, sampled_value=None):
   with open(scaler_path, 'rb') as f:
     scaler = joblib.load(f)
 
   test_dls = []
   percentages =  np.arange(0.02, 0.42, 0.02)
   for percentage in percentages:
-    test_dls.append(get_test_dl(
-        test_data_folder, scaler, building_value=building_value, unsampled_value=unsampled_value, sampled_value=sampled_value, percentage=percentage))
-
+    dl = get_test_dl(
+        test_data_folder, test_batch_size, scaler, building_value=building_value, unsampled_value=unsampled_value, sampled_value=sampled_value, percentage=percentage)
+    test_dls.append(dl)
   model = torch.load(model_path, map_location=torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
   model.eval()
 
